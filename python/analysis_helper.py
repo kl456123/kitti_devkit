@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+
 import os
 
+
 analysis_dir = "./analysis"
+
 
 DIFFICULTY = ['easy', 'moderate', 'hard']
 
@@ -10,6 +13,7 @@ FALSE_CASES = ['fns', 'fps', 'fps_bst', 'fns_bst']
 
 result_dir = "./data"
 label_dir = "~/Data/label/"
+
 label_dir = os.path.expanduser(label_dir)
 
 
@@ -29,21 +33,13 @@ def ListDir(dir_path):
 
 def AnalysisIdxFile(file_path):
     box_idxs = []
-    success = True
     with open(file_path, "r") as f:
         for line in f.readlines():
             line = line.strip()
             if line == "":
                 continue
-            try:
-                line = int(line)
-            except ValueError:
-                # skip item
-                success = False
-                return "", [], success
-            else:
-                box_idxs.append(line)
-    return os.path.basename(file_path), box_idxs, success
+            box_idxs.append(int(line))
+    return os.path.basename(file_path), box_idxs
 
 
 def AnalysisBoxFile(box_file):
@@ -63,20 +59,16 @@ def SaveToFile(info, file_name):
 
 def main():
     for difficulty in DIFFICULTY:
-        print("--------------{}-----------------".format(difficulty))
         for false_case in FALSE_CASES:
-            tmp_dir = os.path.join(analysis_dir, "./", difficulty, "./",
-                                   false_case)
+            tmp_dir = os.path.join(
+                analysis_dir, "./", difficulty, "./", false_case)
             for tmp_file in ListDir(tmp_dir):
-                basename, box_idxs, success = AnalysisIdxFile(tmp_file)
-
-                if not success:
-                    # cannot parse it,just skip it due to analysis it alrealy
-                    continue
+                basename, box_idxs = AnalysisIdxFile(tmp_file)
 
                 if len(box_idxs) == 0:
                     # delete file if it is nothing
                     os.remove(tmp_file)
+                    continue
 
                 # find box infos in label dir or result dir according to box idx and img name
                 # and write infos to file(inplace of old file)
@@ -89,6 +81,4 @@ def main():
 
                 # save back to file(override)
                 SaveToFile(selected_boxes, tmp_file)
-
-
 main()
